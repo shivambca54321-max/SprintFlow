@@ -8,8 +8,11 @@ exports.reviewSubmission = async (req, res) => {
   const { userCode, sprintTitle, constraints, userId, sprintId } = req.body;
 
   try {
-    // FIX: Using the absolute latest 2026 stable model string
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" }); 
+    // FIX: Using the absolute latest stable model with the forced v1 Production API
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-1.5-flash" },
+      { apiVersion: 'v1' }
+    );
 
     const prompt = `Act as a Senior Architect. Review this code for: ${sprintTitle}. 
     Constraints: ${constraints.join(", ")}. 
