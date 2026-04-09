@@ -179,12 +179,13 @@ const EditorPage = () => {
         </aside>
 
         {/* RIGHT PANEL */}
-        <main className="w-full md:w-[60%] lg:w-2/3 bg-brand-night p-4 md:p-6 relative flex flex-col min-h-[450px] md:min-h-0">
-          <div className="hidden sm:block absolute top-0 right-10 bg-brand-orange text-white px-4 py-1 z-10 font-black brutal-border translate-y-[-50%]">
-            NEO_EDITOR_V1.1
-          </div>
+        <main className="w-full md:w-[60%] lg:w-2/3 bg-brand-night p-4 md:p-6 flex flex-col min-h-[450px] md:min-h-0">
           
-          <div className="flex-grow brutal-border brutal-shadow bg-raw-black overflow-hidden h-full">
+          <div className="flex-grow brutal-border brutal-shadow bg-raw-black overflow-hidden relative h-full">
+            <div className="hidden sm:block absolute top-0 right-0 bg-brand-orange text-white px-4 py-1 z-10 font-black brutal-border border-t-0 border-r-0">
+              NEO_EDITOR_V1.1
+            </div>
+            
             <Editor
               height="100%"
               theme="vs-dark"
