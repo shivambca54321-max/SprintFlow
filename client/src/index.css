@@ -1,5 +1,56 @@
 @import "tailwindcss";
 
+/* 2026 Tailwind v4 configuration style */
+@theme {
+  /* YOUR SPECIFIC PALETTE */
+  --color-brand-brown: #713600;      /* Darker Brown */
+  --color-brand-orange: #C05800;     /* Dark Orange */
+  --color-brand-cream: #FDFBD4;      /* Cream Accent */
+  --color-brand-night: #38240D;       /* Near-Black Brown */
+
+  /* Standard Brutalist Colors */
+  --color-raw-black: #000000;
+  --color-raw-white: #FFFFFF;
+}
+
+/* Base Styles */
+@layer base {
+  body {
+    @apply bg-brand-night text-raw-black font-sans antialiased;
+    /* Large font size base for Neo-Brutalism */
+    font-size: 18px;
+  }
+  
+  /* Reset all buttons to be boxy */
+  button {
+    @apply rounded-none;
+  }
+}
+
+/* Custom Utilities for Neo-Brutalism */
+@layer utilities {
+  /* THICK BORDER (3px–6px) */
+  .brutal-border {
+    @apply border-4 border-raw-black;
+  }
+
+  /* HARD OFFSET SHADOW (No blur) */
+  .brutal-shadow {
+    box-shadow: 8px 8px 0px 0px rgba(0,0,0,1);
+  }
+  
+  /* Hard shadow on hover for interactivity */
+  .brutal-shadow-hover:hover {
+    box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
+    transform: translate(4px, 4px);
+  }
+  
+  .brutal-shadow-pressed:active {
+    box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+    transform: translate(8px, 8px);
+  }
+}
+
 :root {
   --text: #6b6375;
   --text-h: #08060d;
