@@ -59,6 +59,7 @@ exports.reviewSubmission = async (req, res) => {
     res.json(parsedResult);
   } catch (error) {
     console.error("AI Error:", error);
-    res.status(500).json({ error: "Architect is offline. Check API Key." });
+    // Send the actual error message back to the frontend so we can debug it
+    res.status(500).json({ error: `CRITICAL ERROR: ${error.message || error}` });
   }
 };
