@@ -4,7 +4,8 @@ import Editor from '@monaco-editor/react';
 import axios from 'axios';
 
 // NEO-Brutalist Result Modal Component
-const AuditModal = ({ review, onClose }) => (
+// NEO-Brutalist Result Modal Component
+const AuditModal = ({ review, onAcknowledge, onRetry }) => (
   <div className="fixed inset-0 bg-raw-black/90 z-50 flex items-center justify-center p-4">
     <div className={`brutal-border brutal-shadow w-full max-w-2xl p-6 md:p-10 relative animate-in zoom-in-95 duration-200 ${
       review.status === 'Passed' ? 'bg-brand-cream' : 'bg-red-500 animate-pulse'
@@ -54,7 +55,7 @@ const AuditModal = ({ review, onClose }) => (
       </div>
 
       <button 
-        onClick={onClose}
+        onClick={review.status === 'Passed' ? onAcknowledge : onRetry}
         className={`w-full brutal-border font-black py-4 text-2xl brutal-shadow brutal-shadow-hover active:translate-y-1 transition-all ${
             review.status === 'Passed' ? 'bg-brand-night text-white' : 'bg-white text-raw-black'
         }`}
@@ -122,7 +123,13 @@ const EditorPage = () => {
     <div className="min-h-screen md:h-screen bg-brand-cream flex flex-col border-[6px] md:border-[10px] border-raw-black overflow-x-hidden">
       
       {/* Result Modal Overlay */}
-      {review && <AuditModal review={review} onClose={() => setReview(null)} />}
+      {review && (
+        <AuditModal 
+          review={review} 
+          onRetry={() => setReview(null)} 
+          onAcknowledge={() => navigate('/')} 
+        />
+      )}
 
       {/* 1. TOP NAV BAR */}
       <nav className="border-b-[4px] md:border-b-[6px] border-raw-black bg-brand-orange p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-4 z-20">
