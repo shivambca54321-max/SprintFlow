@@ -1,3 +1,4 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
 const User = require('../models/User');
 
 // Initialize Google Generative AI with the API Key
@@ -10,10 +11,13 @@ exports.reviewSubmission = async (req, res) => {
         console.log("Starting NEO Audit for:", sprintTitle);
         
         // Using v1 for high stability
-        const model = genAI.getGenerativeModel(
-            { model: "gemini-1.5-flash" },
-            { apiVersion: "v1" }
-        );
+        // Optimized for Stability: gemini-1.5-flash with JSON Mode
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            generationConfig: {
+              responseMimeType: "application/json",
+            }
+        });
 
         const prompt = `
             Act as a Senior Architect at a top tech firm. 
