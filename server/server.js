@@ -45,17 +45,20 @@ app.get('/api/sprints/:id', async (req, res) => {
 });
 
 const User = require('./models/User');
+const { registerUser, loginUser } = require('./controllers/authController');
 
 app.post('/api/review', reviewSubmission);
 
-// PERSISTENCE_DEMO: Fetch or Create a mock user for the demo
-app.get('/api/user/demo', async (req, res) => {
+// AUTHENTICATION ROUTES
+app.post('/api/auth/register', registerUser);
+app.post('/api/auth/login', loginUser);
+
+// PORTFOLIO ROUTE: Fetch populated completed sprints for User
+app.get('/api/user/:id/portfolio', async (req, res) => {
     try {
-        let user = await User.findOne({ username: 'Agent_Zero' });
-        if (!user) {
-            user = await User.create({ username: 'Agent_Zero' });
-        }
-        res.json(user);
+        const user = await User.findById(req.params.id).populate('completedSprints');
+        if (!user) return res.status(404).json({ error: 'AGENT_NOT_FOUND' });
+        res.json({ completedSprints: user.completedSprints, experiencePoints: user.experiencePoints, rank: user.rank });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

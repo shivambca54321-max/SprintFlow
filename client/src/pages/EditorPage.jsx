@@ -75,14 +75,14 @@ const EditorPage = () => {
   const [review, setReview] = useState(null);
 
   useEffect(() => {
+    // Grab cached user from Auth
+    const storedUser = localStorage.getItem('sprintflow_user');
+    if (storedUser) setUser(JSON.parse(storedUser));
+
     const fetchData = async () => {
       try {
-        const [sprintRes, userRes] = await Promise.all([
-            axios.get(`http://localhost:5000/api/sprints/${id}`),
-            axios.get(`http://localhost:5000/api/user/demo`)
-        ]);
+        const sprintRes = await axios.get(`http://localhost:5000/api/sprints/${id}`);
         setSprint(sprintRes.data);
-        setUser(userRes.data);
         setUserCode(sprintRes.data.starterCode);
       } catch (err) {
         console.error("Error fetching data");
@@ -102,7 +102,8 @@ const EditorPage = () => {
         userCode,
         sprintTitle: sprint.title,
         constraints: sprint.constraints,
-        userId: user?._id // Pass user ID for XP update
+        userId: user?._id, // Pass user ID for XP update
+        sprintId: sprint._id
       });
       setReview(data);
     } catch (err) {
