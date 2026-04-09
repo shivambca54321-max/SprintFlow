@@ -1,41 +1,43 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-// Initialize the Gemini SDK
+// Initialize Google Generative AI with the API Key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.reviewSubmission = async (req, res) => {
     const { userCode, sprintTitle, constraints } = req.body;
 
     try {
-        console.log("Starting AI Audit for:", sprintTitle);
-        if (!process.env.GEMINI_API_KEY) {
-            console.error("CRITICAL: GEMINI_API_KEY is missing from .env");
-            return res.status(500).json({ error: "Server Configuration Error: Missing API Key" });
-        }
-
-        // Explicitly set the API version to 'v1' to avoid beta endpoint issues
+        console.log("Starting NEO Audit for:", sprintTitle);
+        
+        // Using v1 for high stability
         const model = genAI.getGenerativeModel(
             { model: "gemini-1.5-flash" },
             { apiVersion: "v1" }
         );
-        const result = await model.generateContent(`Act as a Senior FAANG Architect. Audit this code for the sprint: "${sprintTitle}".
-          Constraints to check: ${constraints.join(", ")}
-          
-          User's Code:
-          ${userCode}
 
-          Return ONLY a JSON object with this structure:
-          {
-            "score": number,
-            "status": "Passed" | "Refactor Needed",
-            "summary": "string",
-            "issues": [{ "type": "string", "line": number, "msg": "string", "fix": "string" }]
-          }`);
+        const prompt = `
+            Act as a Senior Architect at a top tech firm. 
+            Review this code for the following sprint: "${sprintTitle}".
+            Verify these constraints: ${constraints.join(", ")}
+            
+            Code to Audit:
+            ${userCode}
 
-        const response = await result.response;
-        const text = response.text();
+            Respond ONLY in valid JSON format with this exact structure:
+            {
+                "score": 0-100,
+                "status": "Passed" | "Failed",
+                "summary": "Full overview of the submission",
+                "feedback": [
+                    { "type": "Logic" | "Security" | "Style", "msg": "Detailed description of issue", "fix": "Specific fix instruction" }
+                ]
+            }
+        `;
+
+        const result = await model.generateContent(prompt);
+        const text = result.response.text();
         
-        // Robust Extraction: Find the JSON block even if Gemini includes extra text
+        // Robust extraction of JSON block
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
             res.json(JSON.parse(jsonMatch[0]));
@@ -44,13 +46,11 @@ exports.reviewSubmission = async (req, res) => {
         }
     } catch (error) {
         console.error("!!! AI_AUDIT_ERROR_DETAILS !!!");
-        console.error("Status Code:", error.status);
-        console.error("Message:", error.message);
-        console.error("Full Trace:", error);
-        
+        console.error(error);
         res.status(500).json({ 
-            error: "AI Audit failed.", 
-            details: error.message 
+            status: "Failed", 
+            summary: "Architect node timed out. Check terminal for trace.",
+            feedback: [] 
         });
     }
 };

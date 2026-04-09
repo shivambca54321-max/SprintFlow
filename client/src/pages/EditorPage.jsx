@@ -3,6 +3,58 @@ import { useParams, useNavigate } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import axios from 'axios';
 
+// NEO-Brutalist Result Modal Component
+const AuditModal = ({ review, onClose }) => (
+  <div className="fixed inset-0 bg-raw-black/90 z-50 flex items-center justify-center p-4">
+    <div className="bg-brand-cream brutal-border brutal-shadow w-full max-w-2xl p-6 md:p-10 relative animate-in zoom-in-95 duration-200">
+      
+      {/* Result Status Stamp */}
+      <div className={`absolute -top-8 -right-4 brutal-border px-6 py-4 text-3xl md:text-5xl font-black rotate-12 z-10 transition-transform hover:scale-110 ${
+        review.status === 'Passed' ? 'bg-green-400' : 'bg-red-500 text-white'
+      }`}>
+        {review.status.toUpperCase()}!
+      </div>
+
+      <h2 className="text-4xl md:text-6xl font-black mb-6 underline decoration-8 decoration-brand-orange text-raw-black uppercase tracking-tighter">
+        ARCHITECT_REPORT
+      </h2>
+
+      <div className="bg-white brutal-border p-4 mb-8">
+        <p className="text-xl md:text-2xl font-bold italic text-brand-night">
+          "{review.summary}"
+        </p>
+        <div className="mt-4 flex items-center gap-4">
+            <span className="font-black text-2xl">FINAL_SCORE:</span>
+            <span className="text-4xl font-black text-brand-orange">{review.score}/100</span>
+        </div>
+      </div>
+      
+      <div className="space-y-4 max-h-[35vh] overflow-y-auto mb-8 pr-2 brutal-scrollbar">
+        {review.feedback && review.feedback.map((item, i) => (
+          <div key={i} className="brutal-border bg-white p-4 brutal-shadow-hover transition-all">
+            <span className="bg-brand-night text-white px-2 font-black uppercase text-xs inline-block">
+                {item.type}
+            </span>
+            <p className="font-bold text-lg mt-2 text-raw-black leading-tight">
+                ISSUE: {item.msg}
+            </p>
+            <p className="text-brand-orange font-black mt-2 uppercase text-sm italic border-t-2 border-raw-black pt-2">
+                FIX: {item.fix}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <button 
+        onClick={onClose}
+        className="w-full brutal-border bg-brand-night text-white font-black py-4 text-2xl brutal-shadow brutal-shadow-hover active:translate-y-1 transition-all"
+      >
+        ACKNOWLEDGE_&_CLOSE_DISK
+      </button>
+    </div>
+  </div>
+);
+
 const EditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,8 +77,7 @@ const EditorPage = () => {
     fetchSprint();
   }, [id, navigate]);
 
-  // Optimization: Callback for submission to avoid re-renders
-  const handleSubmit = useCallback(async () => {
+  const handleAudit = useCallback(async () => {
     if (!userCode || isAnalyzing) return;
     
     setIsAnalyzing(true);
@@ -39,7 +90,7 @@ const EditorPage = () => {
       });
       setReview(data);
     } catch (err) {
-      alert("Review failed. Ensure server is running.");
+      alert("CRITICAL ERROR: AI_NODE_OFFLINE");
     }
     setIsAnalyzing(false);
   }, [userCode, isAnalyzing, sprint]);
@@ -53,7 +104,10 @@ const EditorPage = () => {
   return (
     <div className="min-h-screen md:h-screen bg-brand-cream flex flex-col border-[6px] md:border-[10px] border-raw-black overflow-x-hidden">
       
-      {/* 1. TOP NAV BAR: Responsive Flex */}
+      {/* Result Modal Overlay */}
+      {review && <AuditModal review={review} onClose={() => setReview(null)} />}
+
+      {/* 1. TOP NAV BAR */}
       <nav className="border-b-[4px] md:border-b-[6px] border-raw-black bg-brand-orange p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-4 z-20">
         <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto justify-between sm:justify-start">
           <button 
@@ -72,19 +126,17 @@ const EditorPage = () => {
             STATUS: [ {isAnalyzing ? "AUDITING" : "STABLE"} ]
           </div>
           <button 
-            onClick={handleSubmit}
+            onClick={handleAudit}
             disabled={isAnalyzing}
             className="flex-1 sm:flex-none brutal-border bg-green-400 px-4 md:px-8 py-2 font-black text-lg md:text-xl brutal-shadow brutal-shadow-hover active:shadow-none transition-all disabled:opacity-50 text-raw-black"
           >
-            {isAnalyzing ? "AUDITING..." : "EXECUTE_AUDIT"}
+            {isAnalyzing ? "AUDITING..." : "SUBMIT_FOR_AUDIT"}
           </button>
         </div>
       </nav>
 
-      {/* 2. MAIN WORKSPACE: Stacks on mobile */}
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
-        
-        {/* LEFT PANEL: The Dossier (Instructions) */}
+        {/* LEFT PANEL */}
         <aside className="w-full md:w-[40%] lg:w-1/3 bg-brand-cream border-b-[6px] md:border-b-0 md:border-r-[6px] border-raw-black p-6 md:p-8 overflow-y-auto">
           <h2 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 underline decoration-4 md:decoration-8 decoration-brand-orange text-raw-black">MISSION_DETAILS</h2>
           <p className="text-base md:text-lg font-bold text-brand-night mb-6 md:mb-8 leading-tight">
@@ -92,48 +144,27 @@ const EditorPage = () => {
           </p>
 
           <div className="bg-raw-white brutal-border p-4 md:p-6 brutal-shadow mb-6 md:mb-8">
-            <h3 className="text-xl md:text-2xl font-black mb-4 uppercase bg-brand-night text-white inline-block px-2">Constraints:</h3>
+            <h3 className="text-xl md:text-2xl font-black mb-4 uppercase bg-brand-night text-white inline-block px-2 italic">Protocols:</h3>
             <ul className="space-y-3 md:space-y-4">
               {sprint.constraints.map((c, i) => (
                 <li key={i} className="flex items-start gap-2 md:gap-3 font-bold text-brand-night text-sm md:text-base">
-                  <span className="bg-brand-orange text-white px-1 text-xs mt-1 shrink-0">#0{i+1}</span>
+                  <span className="bg-brand-orange text-white px-1 text-xs mt-1 shrink-0">#{i+1}</span>
                   {c}
                 </li>
               ))}
             </ul>
           </div>
 
-          {/* AI REVIEW RESULTS: Integrated & Responsive */}
-          {review && (
-            <div className="brutal-border brutal-shadow bg-raw-white p-4 md:p-6 my-6 animate-in slide-in-from-bottom-5 duration-500">
-                <div className="flex justify-between items-center mb-4 border-b-4 border-raw-black pb-2">
-                    <h3 className="text-xl md:text-2xl font-black italic uppercase">AUDIT_REPORT</h3>
-                    <div className="text-2xl md:text-3xl font-black text-brand-orange">{review.score}%</div>
-                </div>
-                <div className={`text-lg md:text-xl font-black mb-2 px-2 inline-block ${review.status === 'Passed' ? 'bg-green-400' : 'bg-red-500 text-white'}`}>
-                    {review.status.toUpperCase()}
-                </div>
-                <p className="font-bold text-brand-night mt-3 leading-tight text-sm md:text-base">{review.summary}</p>
-                
-                {review.issues.length > 0 && (
-                    <div className="mt-6 border-t-2 border-dashed border-raw-black pt-4">
-                        <ul className="space-y-3">
-                            {review.issues.map((issue, idx) => (
-                                <li key={idx} className="text-xs md:text-sm font-bold bg-slate-100 p-2 brutal-border">
-                                    <span className="text-red-500 font-black">[{issue.type}]</span> {issue.msg}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-            </div>
-          )}
+          <div className="border-4 border-dashed border-raw-black p-4 bg-yellow-200">
+            <span className="font-black uppercase">Terminal Alert:</span> 
+            <p className="text-sm font-bold mt-1">AI review is active. Logic errors will be stamped as FAILED.</p>
+          </div>
         </aside>
 
-        {/* RIGHT PANEL: The Reactor (Code Editor) */}
-        <main className="w-full md:w-[60%] lg:w-2/3 bg-brand-night p-4 md:p-6 relative flex flex-col min-h-[400px] md:min-h-0">
+        {/* RIGHT PANEL */}
+        <main className="w-full md:w-[60%] lg:w-2/3 bg-brand-night p-4 md:p-6 relative flex flex-col min-h-[450px] md:min-h-0">
           <div className="hidden sm:block absolute top-0 right-10 bg-brand-orange text-white px-4 py-1 z-10 font-black brutal-border translate-y-[-50%]">
-            V.2026_ENGINE
+            NEO_EDITOR_V1.1
           </div>
           
           <div className="flex-grow brutal-border brutal-shadow bg-raw-black overflow-hidden h-full">
@@ -144,7 +175,7 @@ const EditorPage = () => {
               value={userCode}
               onChange={(val) => setUserCode(val)}
               options={{
-                fontSize: 14,
+                fontSize: 16,
                 fontFamily: 'JetBrains Mono, monospace',
                 minimap: { enabled: false },
                 padding: { top: 20 },
