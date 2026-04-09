@@ -1,27 +1,34 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
 const User = require('../models/User');
 
-// Initialize Google Generative AI with the API Key
+// Initialize Google Generative AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.reviewSubmission = async (req, res) => {
     const { userCode, sprintTitle, constraints, userId } = req.body;
 
     try {
-        console.log("Starting NEO Audit for:", sprintTitle);
+        console.log("Starting NEO Audit (Latest) for:", sprintTitle);
         
-        // Using v1 for high stability
-        // Optimized for Stability: gemini-1.5-flash with JSON Mode
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-1.5-flash-latest",
             generationConfig: {
-              responseMimeType: "application/json",
-            }
+                temperature: 0.2,
+                topP: 0.95,
+                topK: 40,
+                maxOutputTokens: 8192,
+                responseMimeType: "application/json",
+            },
+            safetySettings: [
+                { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_NONE },
+                { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_NONE },
+                { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_NONE },
+            ],
         });
-
+        
         const prompt = `
-            Act as a Senior Architect at a top tech firm. 
-            Review this code for the following sprint: "${sprintTitle}".
+            Act as a Senior FAANG Architect. Audit this code for the sprint: "${sprintTitle}".
             Verify these constraints: ${constraints.join(", ")}
             
             Code to Audit:
