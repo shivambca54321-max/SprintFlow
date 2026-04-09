@@ -13,7 +13,11 @@ exports.reviewSubmission = async (req, res) => {
             return res.status(500).json({ error: "Server Configuration Error: Missing API Key" });
         }
 
-        const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+        // Explicitly set the API version to 'v1' to avoid beta endpoint issues
+        const model = genAI.getGenerativeModel(
+            { model: "gemini-1.5-flash" },
+            { apiVersion: "v1" }
+        );
         const result = await model.generateContent(`Act as a Senior FAANG Architect. Audit this code for the sprint: "${sprintTitle}".
           Constraints to check: ${constraints.join(", ")}
           
