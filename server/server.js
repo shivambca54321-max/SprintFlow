@@ -20,6 +20,8 @@ mongoose.connect(process.env.MONGO_URI)
 const { reviewSubmission } = require('./controllers/aiController');
 
 // Routes
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.get('/', (req, res) => {
     res.send('SprintFlow API is running...');
 });

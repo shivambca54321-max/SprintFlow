@@ -7,7 +7,13 @@ exports.reviewSubmission = async (req, res) => {
     const { userCode, sprintTitle, constraints } = req.body;
 
     try {
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        console.log("Starting AI Audit for:", sprintTitle);
+        if (!process.env.GEMINI_API_KEY) {
+            console.error("CRITICAL: GEMINI_API_KEY is missing from .env");
+            return res.status(500).json({ error: "Server Configuration Error: Missing API Key" });
+        }
+
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const result = await model.generateContent(`Act as a Senior FAANG Architect. Audit this code for the sprint: "${sprintTitle}".
           Constraints to check: ${constraints.join(", ")}
           
@@ -23,9 +29,24 @@ exports.reviewSubmission = async (req, res) => {
           }`);
 
         const response = await result.response;
-        const text = response.text().replace(/```json|```/g, "").trim();
-        res.json(JSON.parse(text));
+        const text = response.text();
+        
+        // Robust Extraction: Find the JSON block even if Gemini includes extra text
+        const jsonMatch = text.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            res.json(JSON.parse(jsonMatch[0]));
+        } else {
+            throw new Error("Invalid AI Response Format");
+        }
     } catch (error) {
-        res.status(500).json({ error: "AI Audit failed. Check API quota." });
+        console.error("!!! AI_AUDIT_ERROR_DETAILS !!!");
+        console.error("Status Code:", error.status);
+        console.error("Message:", error.message);
+        console.error("Full Trace:", error);
+        
+        res.status(500).json({ 
+            error: "AI Audit failed.", 
+            details: error.message 
+        });
     }
 };
