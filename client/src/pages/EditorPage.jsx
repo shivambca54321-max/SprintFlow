@@ -6,39 +6,47 @@ import axios from 'axios';
 // NEO-Brutalist Result Modal Component
 const AuditModal = ({ review, onClose }) => (
   <div className="fixed inset-0 bg-raw-black/90 z-50 flex items-center justify-center p-4">
-    <div className="bg-brand-cream brutal-border brutal-shadow w-full max-w-2xl p-6 md:p-10 relative animate-in zoom-in-95 duration-200">
+    <div className={`brutal-border brutal-shadow w-full max-w-2xl p-6 md:p-10 relative animate-in zoom-in-95 duration-200 ${
+      review.status === 'Passed' ? 'bg-brand-cream' : 'bg-red-500 animate-pulse'
+    }`}>
       
       {/* Result Status Stamp */}
       <div className={`absolute -top-8 -right-4 brutal-border px-6 py-4 text-3xl md:text-5xl font-black rotate-12 z-10 transition-transform hover:scale-110 ${
-        review.status === 'Passed' ? 'bg-green-400' : 'bg-red-500 text-white'
+        review.status === 'Passed' ? 'bg-green-400 text-raw-black' : 'bg-raw-black text-white'
       }`}>
         {review.status.toUpperCase()}!
       </div>
 
-      <h2 className="text-4xl md:text-6xl font-black mb-6 underline decoration-8 decoration-brand-orange text-raw-black uppercase tracking-tighter">
-        ARCHITECT_REPORT
+      <h2 className={`text-4xl md:text-6xl font-black mb-6 underline decoration-8 tracking-tighter uppercase ${
+          review.status === 'Passed' ? 'decoration-brand-orange text-raw-black' : 'decoration-white text-white'
+      }`}>
+        {review.status === 'Passed' ? 'ARCHITECT_REPORT' : 'SYSTEM_FAILURE'}
       </h2>
 
-      <div className="bg-white brutal-border p-4 mb-8">
-        <p className="text-xl md:text-2xl font-bold italic text-brand-night">
+      <div className={`brutal-border p-4 mb-8 ${review.status === 'Passed' ? 'bg-white' : 'bg-raw-black text-white'}`}>
+        <p className="text-xl md:text-2xl font-bold italic">
           "{review.summary}"
         </p>
         <div className="mt-4 flex items-center gap-4">
             <span className="font-black text-2xl">FINAL_SCORE:</span>
-            <span className="text-4xl font-black text-brand-orange">{review.score}/100</span>
+            <span className={`text-4xl font-black ${review.status === 'Passed' ? 'text-brand-orange' : 'text-green-400'}`}>
+                {review.score}/100
+            </span>
         </div>
       </div>
       
       <div className="space-y-4 max-h-[35vh] overflow-y-auto mb-8 pr-2 brutal-scrollbar">
         {review.feedback && review.feedback.map((item, i) => (
-          <div key={i} className="brutal-border bg-white p-4 brutal-shadow-hover transition-all">
-            <span className="bg-brand-night text-white px-2 font-black uppercase text-xs inline-block">
+          <div key={i} className={`brutal-border p-4 brutal-shadow-hover transition-all ${
+              review.status === 'Passed' ? 'bg-white' : 'bg-slate-900 border-white'
+          }`}>
+            <span className={`${review.status === 'Passed' ? 'bg-brand-night text-white' : 'bg-white text-raw-black'} px-2 font-black uppercase text-xs inline-block`}>
                 {item.type}
             </span>
-            <p className="font-bold text-lg mt-2 text-raw-black leading-tight">
+            <p className={`font-bold text-lg mt-2 leading-tight ${review.status === 'Passed' ? 'text-raw-black' : 'text-white'}`}>
                 ISSUE: {item.msg}
             </p>
-            <p className="text-brand-orange font-black mt-2 uppercase text-sm italic border-t-2 border-raw-black pt-2">
+            <p className={`${review.status === 'Passed' ? 'text-brand-orange' : 'text-green-400'} font-black mt-2 uppercase text-sm italic border-t-2 ${review.status === 'Passed' ? 'border-raw-black' : 'border-white'} pt-2`}>
                 FIX: {item.fix}
             </p>
           </div>
@@ -47,9 +55,11 @@ const AuditModal = ({ review, onClose }) => (
 
       <button 
         onClick={onClose}
-        className="w-full brutal-border bg-brand-night text-white font-black py-4 text-2xl brutal-shadow brutal-shadow-hover active:translate-y-1 transition-all"
+        className={`w-full brutal-border font-black py-4 text-2xl brutal-shadow brutal-shadow-hover active:translate-y-1 transition-all ${
+            review.status === 'Passed' ? 'bg-brand-night text-white' : 'bg-white text-raw-black'
+        }`}
       >
-        ACKNOWLEDGE_&_CLOSE_DISK
+        {review.status === 'Passed' ? 'ACKNOWLEDGE_&_CLOSE_DISK' : 'RETRY_INIT_SEQUENCE'}
       </button>
     </div>
   </div>
@@ -59,22 +69,27 @@ const EditorPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [sprint, setSprint] = useState(null);
+  const [user, setUser] = useState(null);
   const [userCode, setUserCode] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [review, setReview] = useState(null);
 
   useEffect(() => {
-    const fetchSprint = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await axios.get(`http://localhost:5000/api/sprints/${id}`);
-        setSprint(data);
-        setUserCode(data.starterCode);
+        const [sprintRes, userRes] = await Promise.all([
+            axios.get(`http://localhost:5000/api/sprints/${id}`),
+            axios.get(`http://localhost:5000/api/user/demo`)
+        ]);
+        setSprint(sprintRes.data);
+        setUser(userRes.data);
+        setUserCode(sprintRes.data.starterCode);
       } catch (err) {
-        console.error("Error fetching sprint details");
+        console.error("Error fetching data");
         navigate('/');
       }
     };
-    fetchSprint();
+    fetchData();
   }, [id, navigate]);
 
   const handleAudit = useCallback(async () => {
@@ -86,14 +101,15 @@ const EditorPage = () => {
       const { data } = await axios.post('http://localhost:5000/api/review', {
         userCode,
         sprintTitle: sprint.title,
-        constraints: sprint.constraints
+        constraints: sprint.constraints,
+        userId: user?._id // Pass user ID for XP update
       });
       setReview(data);
     } catch (err) {
       alert("CRITICAL ERROR: AI_NODE_OFFLINE");
     }
     setIsAnalyzing(false);
-  }, [userCode, isAnalyzing, sprint]);
+  }, [userCode, isAnalyzing, sprint, user]);
 
   if (!sprint) return (
     <div className="bg-brand-night h-screen p-10 font-black text-brand-cream text-3xl md:text-5xl italic animate-pulse flex items-center justify-center">

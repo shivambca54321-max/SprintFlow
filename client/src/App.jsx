@@ -1,40 +1,43 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import axios from 'axios';
 import { SprintCard } from './components/SprintCard';
+import { UserHeader } from './components/UserHeader';
 
 const App = () => {
   const [sprints, setSprints] = useState([]);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Optimization: Persistent axios instance for cleaner calls
   const api = useMemo(() => axios.create({ baseURL: 'http://localhost:5000/api' }), []);
 
   useEffect(() => {
-    const fetchSprints = async () => {
+    const fetchData = async () => {
       try {
-        const { data } = await api.get('/sprints');
-        setSprints(data);
+        const [sprintsRes, userRes] = await Promise.all([
+          api.get('/sprints'),
+          api.get('/user/demo')
+        ]);
+        setSprints(sprintsRes.data);
+        setUser(userRes.data);
       } catch (err) {
-        console.error("Backend connection failed.");
+        console.error("Critical System failure.");
       } finally {
         setLoading(false);
       }
     };
-    fetchSprints();
+    fetchData();
   }, [api]);
 
   return (
     <div className="min-h-screen bg-brand-night p-4 sm:p-8 md:p-16">
-      <header className="max-w-7xl mx-auto mb-12 md:mb-20 text-center border-b-[6px] md:border-b-8 border-raw-black pb-8 md:pb-12">
-        {/* Optimized: Fluid typography using responsive units */}
+      <header className="max-w-7xl mx-auto mb-12 md:mb-16 text-center border-b-[6px] md:border-b-8 border-raw-black pb-8 md:pb-12">
         <h1 className="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-brand-orange leading-none tracking-tighter">
           Sprint<span className="text-raw-white">Flow</span>
           <span className="text-brand-cream block text-4xl sm:text-5xl md:text-6xl mt-4">NEO</span>
         </h1>
-        <p className="text-brand-cream text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mt-6 md:mt-8 font-medium leading-tight">
-          Select your challenge. Master the stack. Get audited by the AI Architect.
-        </p>
       </header>
+
+      {/* COMMAND CENTER: The User Progress Header */}
+      <UserHeader user={user} />
 
       <main className="max-w-7xl mx-auto">
         {loading ? (

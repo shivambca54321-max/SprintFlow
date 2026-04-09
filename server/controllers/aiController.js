@@ -1,10 +1,10 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+const User = require('../models/User');
 
 // Initialize Google Generative AI with the API Key
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 exports.reviewSubmission = async (req, res) => {
-    const { userCode, sprintTitle, constraints } = req.body;
+    const { userCode, sprintTitle, constraints, userId } = req.body;
 
     try {
         console.log("Starting NEO Audit for:", sprintTitle);
@@ -37,10 +37,28 @@ exports.reviewSubmission = async (req, res) => {
         const result = await model.generateContent(prompt);
         const text = result.response.text();
         
-        // Robust extraction of JSON block
         const jsonMatch = text.match(/\{[\s\S]*\}/);
         if (jsonMatch) {
-            res.json(JSON.parse(jsonMatch[0]));
+            const auditResult = JSON.parse(jsonMatch[0]);
+
+            // PERSISTENCE ENGINE: Update XP if Passed
+            if (auditResult.status === "Passed" && userId) {
+                const xpEarned = 250;
+                const user = await User.findById(userId);
+                if (user) {
+                    user.experiencePoints += xpEarned;
+                    // Dynamic Rank Scaling
+                    if (user.experiencePoints > 5000) user.rank = "SYSTEM_ARCHITECT";
+                    else if (user.experiencePoints > 2000) user.rank = "SENIOR_ENFORCER";
+                    else if (user.experiencePoints > 1000) user.rank = "MID_LEVEL_RUNNER";
+                    
+                    await user.save();
+                    auditResult.newXp = user.experiencePoints;
+                    auditResult.newRank = user.rank;
+                }
+            }
+
+            res.json(auditResult);
         } else {
             throw new Error("Invalid AI Response Format");
         }

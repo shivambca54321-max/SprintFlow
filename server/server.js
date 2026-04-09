@@ -44,7 +44,22 @@ app.get('/api/sprints/:id', async (req, res) => {
     }
 });
 
+const User = require('./models/User');
+
 app.post('/api/review', reviewSubmission);
+
+// PERSISTENCE_DEMO: Fetch or Create a mock user for the demo
+app.get('/api/user/demo', async (req, res) => {
+    try {
+        let user = await User.findOne({ username: 'Agent_Zero' });
+        if (!user) {
+            user = await User.create({ username: 'Agent_Zero' });
+        }
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // Start Server
 app.listen(PORT, () => {
