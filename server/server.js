@@ -66,5 +66,4 @@ app.get('/api/user/:id/portfolio', async (req, res) => {
 
 // Start Server
 app.listen(PORT, () => {
-    console.log(`Server is running on port http://localhost:${PORT}`);
 });

@@ -26,7 +26,8 @@ exports.registerUser = async (req, res) => {
             token: generateToken(user._id),
         });
     } catch (error) {
-        res.status(500).json({ error: 'SYSTEM_ERROR_DURING_REGISTRATION' });
+        console.error("REGISTRATION ERROR:", error);
+        res.status(500).json({ error: error.message || 'SYSTEM_ERROR_DURING_REGISTRATION' });
     }
 };
 
