@@ -81,3 +81,82 @@ An animated modal that "slams" onto the screen after the AI finishes thinking. I
 ---
 ### Final Status: READY FOR DEPLOYMENT.
 *SprintFlow NEO represents a modern approach to developer education—raw, honest, and powered by the cutting edge of Generative AI.*
+
+---
+
+
+
+## 📑 PROJECT DOSSIER: SprintFlow NEO
+**Date:** April 2026
+
+**Status:** Version 1.0 (PROD-READY)
+
+**Architecture:** MERN + AI-Agentic Orchestration
+
+**Design Language:** Neo-Brutalism v2.0
+
+### 🎯 1. Executive Vision
+SprintFlow NEO is an elite developer training ecosystem. It moves beyond passive learning by simulating a High-Stakes Production Review. By utilizing the Gemini 3 Flash Agent, the platform provides users with an automated "Senior Architect" who audits code for logic, security, and performance, ensuring that every line of code meets industry standards before a "Sprint" is marked as complete.
+
+### 🎨 3. Design Philosophy: Neo-Brutalism
+The UI is built to be raw, loud, and unapologetic.
+
+**Palette:**
+*   **Primary:** #C05800 (Signal Orange)
+*   **Background:** #FDFBD4 (Vintage Cream)
+*   **Dark:** #38240D (Night Umber)
+
+**Geometry:** 8px solid black borders, 0px border-radius (Strictly Boxy).
+
+**Typography:** Over-sized, heavy sans-serif headings paired with JetBrains Mono for technical data.
+
+**UX Motion:** Utilizes "Slam" animations (Framer Motion) where elements drop onto the grid with high spring tension.
+
+### 🤖 4. The AI Architect Engine
+The core value proposition is the Automated Audit Loop.
+
+**The Prompt Logic:**
+The backend constructs a multi-layered system prompt:
+*   **Persona:** "You are a Senior Architect at a Tier-1 Tech Firm."
+*   **Context:** Injects Sprint-specific constraints (e.g., "Must use JWT", "No hardcoded secrets").
+*   **Auditing Axis:** Logic, Security, Readability, and Performance.
+*   **Data Contract:** AI is forced to return a JSON schema containing score, status, feedback, and suggestedCode.
+
+### 🛠️ 5. Key System Features
+**I. Tactical Sprint Gallery**
+A visual grid of missions categorized by domain (Frontend, Backend, Logic). Cards display real-time difficulty and XP rewards fetched from the MongoDB cluster.
+
+**II. Advanced Workspace**
+A dual-panel coding environment.
+*   **Left:** The "Mission Dossier" containing raw requirements.
+*   **Right:** A Monaco Editor instance with custom themes.
+
+**III. Architect’s Radar (Skill Heatmap)**
+Upon audit, a Radar Chart (Chart.js) renders the user’s score across four skill vectors, providing immediate visual feedback on their engineering strengths and weaknesses.
+
+**IV. Architect’s Refactor (Diff View)**
+A side-by-side comparison between the user's submission and the AI’s optimized version, teaching professional coding patterns through direct contrast.
+
+### 💾 6. Database Schema (Mongoose)
+```javascript
+// Example Sprint Schema
+const SprintSchema = new mongoose.Schema({
+  title: String,
+  category: { type: String, enum: ['Frontend', 'Backend', 'Database', 'Logic'] },
+  difficulty: { type: String, enum: ['Easy', 'Medium', 'Hard'] },
+  description: String,
+  constraints: [String],
+  starterCode: String,
+  xpReward: Number
+});
+```
+
+### 🚀 7. Roadmap & Scaling
+*   **v1.1:** Social Leaderboards and Timed "Global Gauntlet" Sprints.
+*   **v1.2:** Audio-Brutalism (Mechanical soundscapes for UI interactions).
+*   **v2.0:** Multi-file project support and Agentic "Self-Healing" Debugger.
+
+### 🏁 Final Conclusion
+SprintFlow NEO is more than a project; it is a Full-Stack Proof of Work. It proves that as a developer, you can handle AI Integration, Complex State Management, and Modern UI Design while maintaining a clean, professional backend architecture.
+
+This is the complete technical identity of your project. It is ready for the world.
