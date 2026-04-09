@@ -107,7 +107,7 @@ const EditorPage = () => {
       });
       setReview(data);
     } catch (err) {
-      alert("CRITICAL ERROR: AI_NODE_OFFLINE");
+      alert(err.response?.data?.error || "CRITICAL ERROR: AI_NODE_OFFLINE");
     }
     setIsAnalyzing(false);
   }, [userCode, isAnalyzing, sprint, user]);
