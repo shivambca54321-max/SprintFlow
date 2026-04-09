@@ -58,11 +58,11 @@ const EditorPage = () => {
         <div className="flex items-center gap-3 md:gap-4 w-full sm:w-auto justify-between sm:justify-start">
           <button 
             onClick={() => navigate('/')}
-            className="brutal-border bg-raw-white px-3 md:px-4 py-1.5 md:py-2 font-black text-sm md:text-base brutal-shadow-hover transition-all"
+            className="brutal-border bg-raw-white px-3 md:px-4 py-1.5 md:py-2 font-black text-sm md:text-base brutal-shadow-hover transition-all text-raw-black"
           >
             ← BACK
           </button>
-          <h1 className="text-xl md:text-3xl font-black text-raw-black uppercase tracking-tighter truncate">
+          <h1 className="text-xl md:text-2xl lg:text-3xl font-black text-raw-black uppercase tracking-tighter truncate max-w-[200px] md:max-w-md">
             {sprint.title}
           </h1>
         </div>
@@ -74,7 +74,7 @@ const EditorPage = () => {
           <button 
             onClick={handleSubmit}
             disabled={isAnalyzing}
-            className="flex-1 sm:flex-none brutal-border bg-green-400 px-4 md:px-8 py-2 font-black text-lg md:text-xl brutal-shadow brutal-shadow-hover active:shadow-none transition-all disabled:opacity-50"
+            className="flex-1 sm:flex-none brutal-border bg-green-400 px-4 md:px-8 py-2 font-black text-lg md:text-xl brutal-shadow brutal-shadow-hover active:shadow-none transition-all disabled:opacity-50 text-raw-black"
           >
             {isAnalyzing ? "AUDITING..." : "EXECUTE_AUDIT"}
           </button>
@@ -86,7 +86,7 @@ const EditorPage = () => {
         
         {/* LEFT PANEL: The Dossier (Instructions) */}
         <aside className="w-full md:w-[40%] lg:w-1/3 bg-brand-cream border-b-[6px] md:border-b-0 md:border-r-[6px] border-raw-black p-6 md:p-8 overflow-y-auto">
-          <h2 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 underline decoration-4 md:decoration-8 decoration-brand-orange">MISSION_DETAILS</h2>
+          <h2 className="text-3xl md:text-4xl font-black mb-4 md:mb-6 underline decoration-4 md:decoration-8 decoration-brand-orange text-raw-black">MISSION_DETAILS</h2>
           <p className="text-base md:text-lg font-bold text-brand-night mb-6 md:mb-8 leading-tight">
             {sprint.description}
           </p>
